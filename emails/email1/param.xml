@@ -1,0 +1,35 @@
+<!-- emails/email1/param.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter>
+  <name>Volume Metrics Outliers</name>
+  <to>
+	  <email>pdeglon@gmail.com</email>
+  </to>
+  <system>BigQuery</system>
+  <preview>This is your daily email - PROTOTYPE</preview>
+
+  <!-- Data Queries -->
+  <data>
+	  <queryfile>queries/template.sql</queryfile>
+  </data>
+  <data>
+	  <queryfile>queries/additional_data.sql</queryfile>
+  </data>
+
+  <!-- Chart Configurations -->
+  <chart>
+    <title>Outliers Over Time</title>
+    <queryfile>queries/chart_data.sql</queryfile>
+    <vegafile>vega_config.json</vegafile>
+  </chart>
+  <chart>
+    <title>Category Distribution</title>
+    <queryfile>queries/category_chart_data.sql</queryfile>
+    <vegafile>category_vega_config.json</vegafile>
+  </chart>
+
+  <format>html</format>
+  <importance>High</importance>
+</parameter>
+
+

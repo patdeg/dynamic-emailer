@@ -1,0 +1,10 @@
+node_modules/
+package.json
+package-lock.json
+.env
+.emailer_credentials
+keys/
+logs/
+.DS_Store
+*.log
+

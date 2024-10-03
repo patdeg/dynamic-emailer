@@ -1,0 +1,42 @@
+<!-- emails/email1/body.html -->
+<div class="body">
+  <h2>Report Overview</h2>
+  <p>Dear Team,</p>
+  <p>Please find below the outliers in our volume metrics for the current period.</p>
+
+  <!-- Data Tables -->
+  <h3>Outliers Data</h3>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        <% data.forEach(function(table) { %>
+          <% table.columns.forEach(function(column) { %>
+            <th><%= column %></th>
+          <% }); %>
+        <% }); %>
+      </tr>
+    </thead>
+    <tbody>
+      <% data.forEach(function(table) { %>
+        <% table.rows.forEach(function(row) { %>
+          <tr>
+            <% row.forEach(function(cell) { %>
+              <td><%= cell %></td>
+            <% }); %>
+          </tr>
+        <% }); %>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <!-- Charts -->
+  <h3>Visual Insights</h3>
+  <% charts.forEach(function(chart) { %>
+    <div class="chart">
+      <h4><%= chart.title %></h4>
+      <img src="cid:<%= chart.cid %>" alt="<%= chart.title %>">
+    </div>
+  <% }); %>
+</div>
+
+

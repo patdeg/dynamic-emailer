@@ -1,0 +1,24 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "A line chart showing outliers over time.",
+  "mark": "line",
+  "encoding": {
+    "x": {
+      "field": "Date",
+      "type": "temporal",
+      "title": "Date"
+    },
+    "y": {
+      "field": "Actuals",
+      "type": "quantitative",
+      "title": "Actuals"
+    },
+    "color": {
+      "field": "Metric",
+      "type": "nominal",
+      "title": "Metric"
+    }
+  }
+}
+
+

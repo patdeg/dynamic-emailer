@@ -7,7 +7,7 @@ SYMBOL ?= UNH
 
 # By default render the stock_price.star file and deploy to all devices
 test:
-	node app/main.js emails/email1
+	node app/app.js emails/email1
 
 # Show code of all files in the project
 showcode:
@@ -19,6 +19,5 @@ showcode:
 			echo "----------------------------------------------"; \
 			echo; \
 		done; \
-	}
-	#} | wl-copy
+	} | wl-copy
 	@echo "All code copied to clipboard"

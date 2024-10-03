@@ -1,4 +1,3 @@
-<!-- emails/email1/body.html -->
 <div class="body">
   <h2>Report Overview</h2>
   <p>Dear Team,</p>
@@ -9,11 +8,11 @@
   <table border="1" cellpadding="5" cellspacing="0">
     <thead>
       <tr>
-        <% data.forEach(function(table) { %>
-          <% table.columns.forEach(function(column) { %>
+        <% if (data.length > 0) { %>
+          <% data[0].columns.forEach(function(column) { %>
             <th><%= column %></th>
           <% }); %>
-        <% }); %>
+        <% } %>
       </tr>
     </thead>
     <tbody>

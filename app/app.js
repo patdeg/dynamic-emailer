@@ -1,11 +1,9 @@
-// app/main.js
-
 const fs = require('fs');
 const path = require('path');
 const xml2js = require('xml2js');
 const ejs = require('ejs');
 const { readConfig } = require('./config');
-const { executeQuery } = require('./database'); // Import executeQuery from database/index.js
+const { executeQuery } = require('./database'); // Assuming this is how you get data from your database
 const { sendEmail } = require('./email');
 const { generateChartVegaLite } = require('./chart');
 const logger = require('./utils/logger');
@@ -18,22 +16,6 @@ const logger = require('./utils/logger');
  */
 function resolvePath(...segments) {
   return path.join(...segments);
-}
-
-/**
- * Retrieves the system configuration based on the system name.
- *
- * @param {string} systemName - The name of the system (e.g., 'BigQuerySystem').
- * @returns {Object} - The system configuration object.
- * @throws {Error} - If the system configuration is not found.
- */
-function getSystemConfig(systemName) {
-  const config = readConfig();
-  const systemConfig = config.find(c => c.System.toLowerCase() === systemName.toLowerCase());
-  if (!systemConfig) {
-    throw new Error(`System configuration not found for: ${systemName}`);
-  }
-  return systemConfig;
 }
 
 /**
@@ -59,7 +41,7 @@ async function processEmail(emailFolderPath) {
 
     // Ensure all essential files are present
     const essentialFiles = [paramXmlPath, templatePath, headerPath, bodyPath, footerPath];
-    essentialFiles.forEach(filePath => {
+    essentialFiles.forEach((filePath) => {
       if (!fs.existsSync(filePath)) {
         throw new Error(`Required file not found: ${filePath}`);
       }
@@ -75,7 +57,7 @@ async function processEmail(emailFolderPath) {
 
     // Extract parameters from param.xml
     const name = parameter.name[0];
-    const toEmails = parameter.to.map(emailObj => emailObj.email[0]);
+    const toEmails = parameter.to.map((emailObj) => emailObj.email[0]);
     const system = parameter.system[0];
     const preview = parameter.preview[0];
     const format = parameter.format ? parameter.format[0] : 'html';
@@ -97,7 +79,10 @@ async function processEmail(emailFolderPath) {
     logger.info('Email templates loaded successfully.');
 
     // Retrieve system configuration
-    const systemConfig = getSystemConfig(system);
+    const systemConfig = readConfig().find((conf) => conf.System.toLowerCase() === system.toLowerCase());
+    if (!systemConfig) {
+      throw new Error(`System configuration not found for: ${system}`);
+    }
 
     // Execute data queries defined in param.xml
     const dataResults = [];
@@ -156,7 +141,7 @@ async function processEmail(emailFolderPath) {
         const result = await executeQuery(systemConfig, query);
 
         // Prepare data for Vega-Lite
-        const data = result.rows.map(row => {
+        const data = result.rows.map((row) => {
           const rowData = {};
           result.fields.forEach((field, index) => {
             rowData[field.name] = row[index];
@@ -175,42 +160,40 @@ async function processEmail(emailFolderPath) {
         charts.push({
           title: chartItem.title || 'Chart',
           cid: chartFileName, // Content-ID for embedding in the email
-          path: chartFilePath
+          path: chartFilePath,
         });
       }
     }
 
     // Compile the email template with EJS
-    const compiledTemplate = ejs.compile(templateHtml);
-    const templateData = {
+    const compiledTemplate = ejs.render(templateHtml, {
       subject: name,
       header: headerHtml,
       body: bodyHtml,
       footer: footerHtml,
       data: dataResults, // Pass as needed for the body template
-      charts: charts.map(chart => ({
+      charts: charts.map((chart) => ({
         title: chart.title,
-        cid: chart.cid
+        cid: chart.cid,
       })),
-      now: new Date().toLocaleString()
-    };
+      now: new Date().toLocaleString(),
+    });
 
-    const htmlBody = compiledTemplate(templateData);
     logger.info('Email HTML body compiled successfully.');
 
     // Prepare email attachments (charts)
-    const attachments = charts.map(chart => ({
+    const attachments = charts.map((chart) => ({
       filename: chart.cid,
       path: chart.path,
-      cid: chart.cid // Same as referenced in the HTML for embedding
+      cid: chart.cid, // Same as referenced in the HTML for embedding
     }));
 
     // Send the email
-    await sendEmail(toEmails, name, htmlBody, attachments);
+    await sendEmail(toEmails, name, compiledTemplate, attachments);
     logger.info(`Email "${name}" sent successfully to: ${toEmails.join(', ')}`);
 
     // Clean up temporary chart files
-    charts.forEach(chart => {
+    charts.forEach((chart) => {
       fs.unlink(chart.path, (err) => {
         if (err) {
           logger.warn(`Failed to delete temporary chart file: ${chart.path}`, err);
@@ -224,8 +207,7 @@ async function processEmail(emailFolderPath) {
 
   } catch (err) {
     logger.error(`Error processing email at "${emailFolderPath}":`, err);
-    // Depending on requirements, consider exiting or continuing
-    process.exit(1);
+    process.exit(1); // Exit on error
   }
 }
 
@@ -234,7 +216,7 @@ async function processEmail(emailFolderPath) {
   const args = process.argv.slice(2); // Retrieve command-line arguments
 
   if (args.length !== 1) {
-    console.error('Usage: node app/main.js /path/to/email_folder');
+    console.error('Usage: node app.js /path/to/email_folder');
     process.exit(1);
   }
 

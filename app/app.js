@@ -56,9 +56,8 @@ async function processEmail(emailFolderPath) {
     // Extract email parameters
     const name = parameter.name[0];
     const defaultSystem = parameter.defaultsystem[0];
-    const toEmails = parameter.to.map(emailObj => emailObj.email[0]);
+    const toEmails = parameter.to.flatMap(emailObj => emailObj.email);
     const preview = parameter.preview[0];
-    const format = parameter.format ? parameter.format[0] : 'html';
 
     // Read template files
     const templateHtml = fs.readFileSync(templatePath, 'utf8');

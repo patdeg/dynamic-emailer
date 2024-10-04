@@ -24,11 +24,11 @@ function processBigQueryRows(rows, fields) {
         processedRow[field.name] = value.value;
       } else if (value !== undefined) {
         // Use the value if it's not undefined
-        processedRow[field.name] = value;
+        processedRow[field.name] = value.toString(); // Convert to string for universal format
       } else {
         // Log an issue if the value is undefined and handle it
         logger.warn(`Undefined value for field '${field.name}' in row ${rowIndex}.`);
-        processedRow[field.name] = null; // Use null or another default value
+        processedRow[field.name] = ""; // Use an empty string to standardize format
       }
     });
 
@@ -86,7 +86,15 @@ async function queryBigQuery(systemConfig, query) {
     // Process rows to convert BigQueryDate to string and handle undefined values
     const processedRows = processBigQueryRows(rows, fields);
 
-    return { fields, rows: processedRows };
+    // Create the universal format
+    const universalData = {
+      columns: fields.map(field => field.name),
+      rows: processedRows,
+      types: fields.map(field => field.type.toLowerCase()), // Convert field types to lowercase for consistency
+      query: query // Include the original query for reference
+    };
+
+    return universalData;
 
   } catch (error) {
     logger.error(`BigQuery Execution Error: ${error.message}`);

@@ -8,6 +8,7 @@ const snowflake = require('./snowflake');
 const postgres = require('./postgres');
 const sqlserver = require('./sqlserver');
 const sqlite = require('./sqlite');
+const mysql = require('./mysql');
 const logger = require('../utils/logger');
 
 /**
@@ -48,8 +49,11 @@ async function executeQuery(systemConfig, query) {
         result = await sqlserver.querySqlServer(systemConfig, query);
         break;
       case 'sqlite':
-        result = await sqlite.querySqlServer(systemConfig, query);
-        break;
+    	result = await sqlite.querySQLite(systemConfig, query);
+    	break;
+      case 'mysql':
+    	result = await mysql.queryMySQL(systemConfig, query);
+    	break;
       default:
         throw new Error(`Unsupported system type: ${systemConfig.SystemType}`);
     }

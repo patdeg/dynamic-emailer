@@ -1,18 +1,18 @@
 /**
- * @file postgres.js
- * @description Module for executing queries against PostgreSQL.
+ * @file mysql.js
+ * @description Module for executing queries against MySQL.
  */
 
-const { Client } = require('pg');
+const mysql = require('mysql2/promise');
 const logger = require('../utils/logger');
 
 /**
- * Processes PostgreSQL rows, converting undefined values to empty strings and handling types.
- * @param {Array} rows - The rows returned from the PostgreSQL query.
+ * Processes MySQL rows, converting undefined values to empty strings and handling types.
+ * @param {Array} rows - The rows returned from the MySQL query.
  * @param {Array} columns - The column names.
  * @returns {Array} - Processed rows with undefined values handled.
  */
-function processPostgresRows(rows, columns) {
+function processMySQLRows(rows, columns) {
   return rows.map((row, rowIndex) => {
     const processedRow = {};
 
@@ -32,31 +32,32 @@ function processPostgresRows(rows, columns) {
 }
 
 /**
- * Executes a PostgreSQL SQL query using the query() method and returns a standardized format.
- * @param {Object} systemConfig - The system configuration for PostgreSQL.
+ * Executes a MySQL SQL query using the query() method and returns a standardized format.
+ * @param {Object} systemConfig - The system configuration for MySQL.
  * @param {string} queryText - The SQL query to execute.
  * @returns {Promise<Object>} - The query result in universal format.
  */
-async function queryPostgres(systemConfig, queryText) {
-  const client = new Client({
+async function queryMySQL(systemConfig, queryText) {
+  const connectionConfig = {
     host: systemConfig.Host,
     user: systemConfig.Username,
     password: systemConfig.Password,
     database: systemConfig.Database,
-    port: systemConfig.Port || 5432,
+    port: systemConfig.Port || 3306,
     ssl: systemConfig.SSL || false,
-  });
-  
-  try {
-    await client.connect();
-    logger.info('Connected to PostgreSQL.');
-    const res = await client.query(queryText);
-    logger.info('PostgreSQL query executed successfully.');
+  };
 
-    if (res.rows.length > 0) {
-      const columns = res.fields.map(field => field.name);
-      const types = res.fields.map(field => field.dataTypeID === 1700 ? 'FLOAT' : 'STRING'); // Basic type inference
-      const processedRows = processPostgresRows(res.rows, columns);
+  let connection;
+  try {
+    connection = await mysql.createConnection(connectionConfig);
+    logger.info('Connected to MySQL.');
+    const [rows, fields] = await connection.execute(queryText);
+    logger.info('MySQL query executed successfully.');
+
+    if (rows.length > 0) {
+      const columns = fields.map(field => field.name);
+      const types = fields.map(field => field.type === 246 ? 'FLOAT' : 'STRING'); // Simplistic type inference for MySQL
+      const processedRows = processMySQLRows(rows, columns);
 
       const universalData = {
         columns: columns,
@@ -76,14 +77,16 @@ async function queryPostgres(systemConfig, queryText) {
     }
 
   } catch (error) {
-    logger.error('PostgreSQL query error:', error);
+    logger.error('MySQL query error:', error);
     throw error;
   } finally {
-    await client.end();
-    logger.info('PostgreSQL connection closed.');
+    if (connection) {
+      await connection.end();
+      logger.info('MySQL connection closed.');
+    }
   }
 }
 
-module.exports = { queryPostgres };
+module.exports = { queryMySQL };
 
 

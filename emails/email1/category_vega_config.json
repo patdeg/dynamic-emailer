@@ -21,9 +21,9 @@
   },
   "encoding": {
     "x": {
-      "field": "bike_type",
+      "field": "category",
       "type": "nominal",
-      "title": "Bike Type",
+      "title": "Category",
       "axis": {
         "labelAngle": 0 
       }
@@ -39,9 +39,9 @@
       }
     },
     "color": {
-      "field": "bike_type",
+      "field": "category",
       "type": "nominal",
-      "title": "Bike Type",
+      "title": "Category",
       "scale": {
         "range": ["#FF6347", "#4682B4", "#32CD32"]
       }

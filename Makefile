@@ -14,7 +14,7 @@ test:
 # Task to copy all project code to the clipboard (excluding test and package files)
 showcode:
 	@{ \
-		for f in `git ls-files | grep -v test | grep -v package` ; do \
+		for f in `git ls-files | grep -v test | grep -v package-lock | grep database ` ; do \
 			echo "// $$f"; \
 			cat "$$f"; \
 			echo; \

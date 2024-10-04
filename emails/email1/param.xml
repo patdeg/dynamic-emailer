@@ -1,33 +1,37 @@
 <!-- emails/email1/param.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
 <parameter>
-  <name>Volume Metrics Outliers</name>
+  <name>My Test Email Report</name>
   <to>
 	  <email>pdeglon@gmail.com</email>
   </to>
-  <system>BigQuery</system>
-  <preview>This is your daily email - PROTOTYPE</preview>
+  <defaultsystem>BigQuery1</defaultsystem>
+  <preview>This is your daily email report - PROTOTYPE</preview>
 
   <!-- Data Queries -->
   <data>
+          <system>BigQuery1</system>
 	  <queryfile>queries/template.sql</queryfile>
   </data>
   <data>
+          <system>BigQuery1</system>
 	  <queryfile>queries/additional_data.sql</queryfile>
   </data>
 
   <!-- Chart Configurations -->
   <chart>
   <title>Bike Rides Over Time</title>
+  <system>SQLite2</system>
   <queryfile>queries/timeseries_data.sql</queryfile>
   <vegafile>timeseries_vega_config.json</vegafile>
   <cid>time_series_chart</cid>
 </chart>
 <chart>
-  <title>Distribution of Bike Types</title>
+  <title>Distribution of LuckPerm Action Name</title>
+  <system>MySQL3</system>
   <queryfile>queries/category_chart_data.sql</queryfile>
   <vegafile>category_vega_config.json</vegafile>
-  <cid>bike_type_chart</cid>
+  <cid>category_chart</cid>
 </chart>
 
   <format>html</format>

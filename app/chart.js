@@ -13,33 +13,20 @@ const logger = require('./utils/logger');
 /**
  * Prepares the Vega data by mapping result fields and rows.
  * Handles various data types such as dates and numbers dynamically.
- * @param {Object} result - The query result from the database containing fields and rows.
+ * @param {Object} data - The processed data from the query result.
  * @returns {Array<Object>} - The data prepared for Vega-Lite specification.
  */
-function prepareVegaData(result) {
-  if (!result.rows || !result.fields) {
-    logger.error('Result is missing rows or fields.');
-    return [];
-  }
-  logger.info(`Preparing Vega data. Rows: ${result.rows.length}, Fields: ${result.fields.length}`);
+function prepareVegaData(data) {
+  const { rows, columns } = data;
+  
+  logger.info(`Preparing Vega data. Rows: ${rows.length}, Columns: ${columns.length}`);
 
-  return result.rows.map(row => {
+  // Return rows directly, as they are already formatted as objects with field names
+  return rows.map(row => {
     const processedRow = {};
 
-    result.fields.forEach(field => {
-      let value = row[field.name];
-
-      if (value instanceof Date) {
-        value = value.toISOString().split('T')[0]; // Format dates as YYYY-MM-DD
-      } else if (typeof value === 'object' && value !== null && value.value) {
-        value = value.value; // Handle special types like BigQueryDate
-      } else if (typeof value === 'number') {
-        // Leave numbers as-is
-      } else {
-        value = String(value); // Convert to string by default
-      }
-
-      processedRow[field.name] = value;
+    columns.forEach(col => {
+      processedRow[col] = row[col];  // Map each column to its corresponding field in the row
     });
 
     return processedRow;
@@ -49,16 +36,18 @@ function prepareVegaData(result) {
 /**
  * Generates a chart image from Vega-Lite specification and data.
  * @param {Object} vegaSpecTemplate - The Vega-Lite JSON specification.
- * @param {Object} result - The query result containing fields and rows.
+ * @param {Object} data - The processed data containing columns and rows.
  * @param {string} outputPath - The path where the generated chart image will be saved.
  * @returns {Promise<void>}
  */
-async function generateChart(vegaSpecTemplate, result, outputPath) {
-  const vegaData = prepareVegaData(result);
+async function generateChart(vegaSpecTemplate, data, outputPath) {
+  const vegaData = prepareVegaData(data);
+  logger.debug("Vega Data:");
+  console.table(vegaData);
 
   const vegaSpec = {
     ...vegaSpecTemplate,
-    data: { values: vegaData }
+    data: { values: vegaData }  // Directly inject the mapped data into the Vega-Lite spec
   };
 
   return new Promise((resolve, reject) => {

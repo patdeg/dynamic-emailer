@@ -19,7 +19,7 @@
   },
   "encoding": {
     "x": {
-      "field": "CAL_DATE",
+      "field": "cal_date",
       "type": "temporal",
       "title": "Date"
     },

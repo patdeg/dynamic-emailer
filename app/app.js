@@ -55,8 +55,8 @@ async function processEmail(emailFolderPath) {
 
     // Extract email parameters
     const name = parameter.name[0];
+    const defaultSystem = parameter.defaultsystem[0];
     const toEmails = parameter.to.map(emailObj => emailObj.email[0]);
-    const system = parameter.system[0];
     const preview = parameter.preview[0];
     const format = parameter.format ? parameter.format[0] : 'html';
 
@@ -72,16 +72,20 @@ async function processEmail(emailFolderPath) {
       .replace('<!-- Body Section -->', bodyHtml)
       .replace('<!-- Footer Section -->', footerHtml);
 
-    // Get system configuration
-    const systemConfig = readConfig().find(conf => conf.System.toLowerCase() === system.toLowerCase());
-    if (!systemConfig) {
-      throw new Error(`System configuration not found for: ${system}`);
-    }
 
     // Execute data queries
     const dataResults = [];
     if (parameter.data) {
       for (const dataItem of parameter.data) {
+        system = defaultSystem;
+	if (dataItem.system) {
+		system = dataItem.system[0];
+	}
+        logger.debug("System:", system);
+	const systemConfig = readConfig().find(conf => conf.System.toLowerCase() === system.toLowerCase());
+        if (!systemConfig) {
+          throw new Error(`System configuration not found for: ${system}`);
+        }
         const query = dataItem.queryfile
           ? fs.readFileSync(resolvePath(emailFolderPath, dataItem.queryfile[0]), 'utf8')
           : dataItem.query[0];
@@ -95,6 +99,14 @@ async function processEmail(emailFolderPath) {
     const charts = [];
     if (parameter.chart) {
       for (const chartItem of parameter.chart) {
+        system = defaultSystem;
+	if (chartItem.system) {
+		system = chartItem.system[0];
+	}
+        const systemConfig = readConfig().find(conf => conf.System.toLowerCase() === system.toLowerCase());
+        if (!systemConfig) {
+          throw new Error(`System configuration not found for: ${system}`);
+        }
         const query = chartItem.queryfile
           ? fs.readFileSync(resolvePath(emailFolderPath, chartItem.queryfile[0]), 'utf8')
           : chartItem.query[0];
@@ -122,13 +134,19 @@ async function processEmail(emailFolderPath) {
       }
     }
 
-    // Compile the email template with data and charts
+    logger.debug("Data:",JSON.stringify(dataResults, null, 2));
+    logger.debug("Charts:",JSON.stringify(charts, null, 2));
+  
+	  // Compile the email template with data and charts
     const compiledTemplate = ejs.render(augmentedTemplate, {
       subject: name,
-      data: dataResults,
-      charts: charts.map(chart => ({ title: chart.title, cid: chart.cid })),
+      preview: preview,
+      data: dataResults,  // Pass the processed data results here
+      charts: charts,  // Pass the chart information here
       now: new Date().toLocaleString(),
     });
+
+      //charts: charts.map(chart => ({ title: chart.title, cid: chart.cid })),
 
     // Prepare attachments for email
     const attachments = charts.map(chart => ({

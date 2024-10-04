@@ -5,25 +5,23 @@
   <!-- Data Tables -->
   <h3>Outliers Data</h3>
   <table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-      <tr>
-        <% if (data.length > 0) { %>
-          <% data[0].fields.forEach(function(field) { %>
-            <th><%= field.name %></th>
-          <% }); %>
-        <% } %>
-      </tr>
-    </thead>
-    <tbody>
+   <thead>
+    <tr>
+        <!-- Manually select the first two column headers -->
+        <th><%= data[0].columns[0] %></th>
+        <th><%= data[0].columns[1] %></th>
+    </tr>
+  </thead>
+  <tbody>
       <% data[0].rows.forEach(function(row) { %>
         <tr>
-          <% data[0].fields.forEach(function(field) { %>
-            <td><%= row[field.name] %></td>
-          <% }); %>
+          <!-- Manually select the first two columns of the row -->
+          <td><%= row.CAL_DATE %></td>
+	  <td><%= row.N %></td>
         </tr>
       <% }); %>
-    </tbody>
-  </table>
+  </tbody>
+</table>
 
   <!-- Charts Section -->
 <h3>Visual Insights</h3>

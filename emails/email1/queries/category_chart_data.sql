@@ -1,11 +1,8 @@
 -- category_chart_data.sql
 SELECT
-  bike_type,
-  COUNT(1) AS N
- FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips`
- WHERE
-  start_time>='2024-06-01 00:00:00'
+	acted_name AS category, 
+	COUNT(1) AS N 
+FROM
+	luckperms_actions 
 GROUP BY 1
-ORDER BY 2 DESC
-
-
+ORDER BY 2 DESC;

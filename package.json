@@ -1,47 +1,29 @@
 {
-  "name": "emailer-project",
+  "name": "emailer-js",
   "version": "1.0.0",
-  "description": "A Node.js application for sending various types of emails with database integrations.",
+  "description": "A Node.js application for creating and sending customized, data-driven emails.",
   "main": "app/app.js",
   "scripts": {
     "start": "node app/app.js",
-    "dev": "nodemon app/app.js",
-    "lint": "eslint ."
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "email",
-    "mailer",
-    "nodejs",
-    "bigquery",
-    "snowflake",
-    "postgresql",
-    "sqlserver"
-  ],
-  "author": "Your Name",
-  "license": "ISC",
+  "author": "Patrick Deglon",
+  "license": "MIT",
   "dependencies": {
-    "@google-cloud/bigquery": "^6.0.0",
-    "canvas": "^2.11.0",
-    "dotenv": "^16.0.3",
-    "ejs": "^3.1.9",
-    "mssql": "^9.0.1",
-    "nodemailer": "^6.9.1",
-    "pg": "^8.10.0",
-    "readline-sync": "^1.4.10",
-    "snowflake-sdk": "^1.6.14",
-    "vega": "^5.24.0",
-    "vega-lite": "^5.9.0",
-    "winston": "^3.8.2",
-    "winston-daily-rotate-file": "^4.7.1",
-    "xml2js": "^0.4.23"
+    "@google-cloud/bigquery": "^7.9.1",
+    "canvas": "^2.11.2",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "nodemailer": "^6.9.15",
+    "pg": "^8.13.0",
+    "snowflake-sdk": "^1.14.0",
+    "sqlite3": "^5.1.7",
+    "vega": "^5.30.0",
+    "vega-lite": "^5.21.0",
+    "winston": "^3.14.2",
+    "xml2js": "^0.6.2"
   },
-  "devDependencies": {
-    "@eslint/js": "^9.11.1",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "globals": "^15.10.0",
-    "nodemon": "^2.0.22",
-    "prettier": "^3.3.3"
-  }
+  "devDependencies": {}
 }
+
+

@@ -3,32 +3,21 @@
 
 ## Overview
 
-**Emailer.js** is a powerful Node.js application that automates the creation and sending of customized, data-driven emails. The emails are dynamically generated based on configuration files (such as XML) that allow the user to connect to multiple databases, retrieve data, and visualize it in embedded charts. The application can be tailored to meet the needs of a variety of email formats, ensuring that data delivery is both informative and visually appealing.
+**Emailer.js** is a Node.js application for creating and sending customized, data-driven emails. The emails are generated based on configuration files and allow integration with various databases and visual charts using Vega-Lite.
 
 ## Features
 
-- **Dynamic Email Generation:** Generates emails with dynamic content, embedded data tables, and visual charts based on customizable templates.
-- **Multi-Database Support:** Connects to and queries various databases such as BigQuery, Snowflake, PostgreSQL, and SQL Server.
-- **Encryption & Security:** Encrypts sensitive credentials and environment variables to ensure secure configuration management.
-- **Charting Support:** Creates dynamic charts using Vega-Lite specifications, enabling rich visual representations of data.
-- **Logging:** Implements comprehensive logging with Winston to monitor processes and debug issues effectively.
-- **Modular Architecture:** Modular and easily extensible to support additional email types, databases, or charting methods.
+- **Dynamic Email Generation:** Generates customized emails with dynamic content, including data tables and embedded charts.
+- **Database Integration:** Supports BigQuery, Snowflake, PostgreSQL, and SQL Server.
+- **Security:** Handles encryption for sensitive credentials and environment variables.
+- **Charting:** Uses Vega-Lite for creating charts embedded within emails.
+- **Logging:** Implements comprehensive logging using Winston.
 
 ## Prerequisites
 
 - **Node.js** (v14 or later)
 - **npm** (v6 or later)
-- **Global Dependencies:**
-  - `vega-cli` (for chart generation)
   
-  Install using:
-
-  ```bash
-  npm install -g vega-cli
-  ```
-
-- **Database Access:** Ensure you have the necessary credentials and permissions to access the databases you intend to query.
-
 ## Installation
 
 1. **Clone the Repository:**
@@ -56,6 +45,31 @@
    BIGQUERY_KEYFILE=path/to/your_bigquery_keyfile.json
    ```
 
+4. **Configure Emailer Credentials:**
+
+   Create a `.emailer_credentials` file in the root directory with the necessary database and email configurations in JSON format.
+
+   Example of `.emailer_credentials`:
+
+   ```json
+   [
+     {
+       "System": "BigQuery",
+       "SystemType": "bigquery",
+       "ProjectId": "your_project_id",
+       "KeyFile": "path/to/keyfile.json"
+     },
+     {
+       "System": "SMTP",
+       "SystemType": "smtp",
+       "Host": "smtp.your-email.com",
+       "Port": 587,
+       "Username": "your_username",
+       "Password": "encrypted_password"
+     }
+   ]
+   ```
+
 ## Usage
 
 To run the application and send an email:
@@ -70,8 +84,6 @@ Example:
 node app/app.js emails/email1
 ```
 
-This command will process the email configuration from the `emails/email1` folder, execute the necessary queries, generate charts, and send the email.
-
 ## Project Structure
 
 ```
@@ -80,6 +92,10 @@ emailer.js/
 ├── Makefile
 ├── README.md
 ├── LICENSE
+├── .env
+├── .email_credentials
+├── keys/
+│   ├── demeter-harvest-key.json
 ├── app/
 │   ├── chart.js
 │   ├── config.js
@@ -112,10 +128,6 @@ emailer.js/
 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-## Contributing
-
-Contributions are welcome! Please fork this repository and submit a pull request with your changes.
-
 ## Contact
 
-For any questions or feedback, please contact [your-email@example.com].
+For any questions or feedback, please contact Patrick Deglon at [pdeglon@gmail.com](mailto:pdeglon@gmail.com).

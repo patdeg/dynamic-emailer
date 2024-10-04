@@ -3,226 +3,128 @@ const path = require('path');
 const xml2js = require('xml2js');
 const ejs = require('ejs');
 const { readConfig } = require('./config');
-const { executeQuery } = require('./database'); // Assuming this is how you get data from your database
+const { executeQuery } = require('./database');
 const { sendEmail } = require('./email');
-const { generateChartVegaLite } = require('./chart');
+const { generateChart } = require('./chart');
 const logger = require('./utils/logger');
 
-/**
- * Helper function to resolve file paths.
- *
- * @param  {...string} segments - Path segments to join.
- * @returns {string} - The resolved absolute path.
- */
 function resolvePath(...segments) {
   return path.join(...segments);
 }
 
-/**
- * Processes a single email based on the provided email folder path.
- *
- * @param {string} emailFolderPath - The absolute path to the email folder.
- */
 async function processEmail(emailFolderPath) {
   try {
     logger.info(`\n=== Processing email at: ${emailFolderPath} ===`);
 
-    // Verify that the email folder exists
-    if (!fs.existsSync(emailFolderPath)) {
-      throw new Error(`Email folder does not exist: ${emailFolderPath}`);
-    }
-
-    // Define paths to essential files within the email folder
     const paramXmlPath = resolvePath(emailFolderPath, 'param.xml');
     const templatePath = resolvePath(emailFolderPath, 'template.html');
     const headerPath = resolvePath(emailFolderPath, 'header.html');
     const bodyPath = resolvePath(emailFolderPath, 'body.html');
     const footerPath = resolvePath(emailFolderPath, 'footer.html');
 
-    // Ensure all essential files are present
     const essentialFiles = [paramXmlPath, templatePath, headerPath, bodyPath, footerPath];
-    essentialFiles.forEach((filePath) => {
+    essentialFiles.forEach(filePath => {
       if (!fs.existsSync(filePath)) {
         throw new Error(`Required file not found: ${filePath}`);
       }
     });
 
-    logger.info('All essential files are present.');
-
-    // Read and parse param.xml
     const paramXml = fs.readFileSync(paramXmlPath, 'utf8');
     const parser = new xml2js.Parser();
     const param = await parser.parseStringPromise(paramXml);
     const parameter = param.parameter;
 
-    // Extract parameters from param.xml
     const name = parameter.name[0];
-    const toEmails = parameter.to.map((emailObj) => emailObj.email[0]);
+    const toEmails = parameter.to.map(emailObj => emailObj.email[0]);
     const system = parameter.system[0];
     const preview = parameter.preview[0];
     const format = parameter.format ? parameter.format[0] : 'html';
-    const importance = parameter.importance ? parameter.importance[0] : 'Normal';
 
-    logger.info(`Email Subject: ${name}`);
-    logger.info(`Recipients: ${toEmails.join(', ')}`);
-    logger.info(`System: ${system}`);
-    logger.info(`Preview Text: ${preview}`);
-    logger.info(`Format: ${format}`);
-    logger.info(`Importance: ${importance}`);
-
-    // Read email-specific templates
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
     const headerHtml = fs.readFileSync(headerPath, 'utf8');
     const bodyHtml = fs.readFileSync(bodyPath, 'utf8');
     const footerHtml = fs.readFileSync(footerPath, 'utf8');
 
-    logger.info('Email templates loaded successfully.');
+    const augmentedTemplate = templateHtml
+      .replace('<!-- Header Section -->', headerHtml)
+      .replace('<!-- Body Section -->', bodyHtml)
+      .replace('<!-- Footer Section -->', footerHtml);
 
-    // Retrieve system configuration
-    const systemConfig = readConfig().find((conf) => conf.System.toLowerCase() === system.toLowerCase());
+    const systemConfig = readConfig().find(conf => conf.System.toLowerCase() === system.toLowerCase());
     if (!systemConfig) {
       throw new Error(`System configuration not found for: ${system}`);
     }
 
-    // Execute data queries defined in param.xml
     const dataResults = [];
     if (parameter.data) {
       for (const dataItem of parameter.data) {
-        if (dataItem.queryfile) {
-          const queryFilePath = resolvePath(emailFolderPath, dataItem.queryfile[0]);
-          const query = fs.readFileSync(queryFilePath, 'utf8');
-          logger.info(`Executing query from file: ${dataItem.queryfile[0]}`);
-          const result = await executeQuery(systemConfig, query);
-          dataResults.push(result);
-          logger.info('Query executed successfully.');
-        }
-        // Handle inline queries if present
-        if (dataItem.query) {
-          const query = dataItem.query[0];
-          logger.info('Executing inline query.');
-          const result = await executeQuery(systemConfig, query);
-          dataResults.push(result);
-          logger.info('Inline query executed successfully.');
-        }
+        const query = dataItem.queryfile
+          ? fs.readFileSync(resolvePath(emailFolderPath, dataItem.queryfile[0]), 'utf8')
+          : dataItem.query[0];
+
+        const result = await executeQuery(systemConfig, query);
+        dataResults.push(result);
       }
     }
 
-    // Generate charts as defined in param.xml
     const charts = [];
     if (parameter.chart) {
       for (const chartItem of parameter.chart) {
-        let query = '';
-        if (chartItem.queryfile) {
-          const queryFilePath = resolvePath(emailFolderPath, chartItem.queryfile[0]);
-          query = fs.readFileSync(queryFilePath, 'utf8');
-          logger.info(`Executing chart query from file: ${chartItem.queryfile[0]}`);
-        }
-        if (chartItem.query) {
-          query = chartItem.query[0];
-          logger.info('Executing inline chart query.');
-        }
+        const query = chartItem.queryfile
+          ? fs.readFileSync(resolvePath(emailFolderPath, chartItem.queryfile[0]), 'utf8')
+          : chartItem.query[0];
 
-        // Load Vega-Lite configuration
         const vegafile = chartItem.vegafile ? resolvePath(emailFolderPath, chartItem.vegafile[0]) : null;
-        let vegaSpec = {};
+        const vegaSpec = vegafile ? JSON.parse(fs.readFileSync(vegafile, 'utf8')) : JSON.parse(chartItem.vega[0]);
 
-        if (vegafile && fs.existsSync(vegafile)) {
-          const vegaConfigContent = fs.readFileSync(vegafile, 'utf8');
-          vegaSpec = JSON.parse(vegaConfigContent);
-          logger.info(`Loaded Vega-Lite config from: ${chartItem.vegafile[0]}`);
-        } else if (chartItem.vega) {
-          vegaSpec = JSON.parse(chartItem.vega[0]);
-          logger.info('Loaded Vega-Lite config from inline definition.');
-        } else {
-          throw new Error(`Vega-Lite configuration missing for chart in ${emailFolderPath}`);
-        }
-
-        // Execute the chart query
         const result = await executeQuery(systemConfig, query);
-
-        // Prepare data for Vega-Lite
-        const data = result.rows.map((row) => {
-          const rowData = {};
-          result.fields.forEach((field, index) => {
-            rowData[field.name] = row[index];
-          });
-          return rowData;
-        });
-
-        // Generate chart image
         const chartFileName = `chart_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.png`;
-        const chartFilePath = path.join('/tmp', chartFileName); // Ensure /tmp exists and is writable
+        const chartFilePath = path.join('/tmp', chartFileName);
 
-        await generateChartVegaLite(vegaSpec, data, chartFilePath);
-        logger.info(`Generated chart image at: ${chartFilePath}`);
+	console.log("Vega data:");
+	console.table(result);
 
-        // Add chart details for email embedding
+        await generateChart(vegaSpec, result, chartFilePath);
+
         charts.push({
           title: chartItem.title || 'Chart',
-          cid: chartFileName, // Content-ID for embedding in the email
+          cid: chartFileName,
           path: chartFilePath,
         });
       }
     }
 
-    // Compile the email template with EJS
-    const compiledTemplate = ejs.render(templateHtml, {
+    const compiledTemplate = ejs.render(augmentedTemplate, {
       subject: name,
-      header: headerHtml,
-      body: bodyHtml,
-      footer: footerHtml,
-      data: dataResults, // Pass as needed for the body template
-      charts: charts.map((chart) => ({
-        title: chart.title,
-        cid: chart.cid,
-      })),
+      data: dataResults,
+      charts: charts.map(chart => ({ title: chart.title, cid: chart.cid })),
       now: new Date().toLocaleString(),
     });
 
-    logger.info('Email HTML body compiled successfully.');
-
-    // Prepare email attachments (charts)
-    const attachments = charts.map((chart) => ({
+    const attachments = charts.map(chart => ({
       filename: chart.cid,
       path: chart.path,
-      cid: chart.cid, // Same as referenced in the HTML for embedding
+      cid: chart.cid,
     }));
 
-    // Send the email
     await sendEmail(toEmails, name, compiledTemplate, attachments);
-    logger.info(`Email "${name}" sent successfully to: ${toEmails.join(', ')}`);
-
-    // Clean up temporary chart files
-    charts.forEach((chart) => {
-      fs.unlink(chart.path, (err) => {
-        if (err) {
-          logger.warn(`Failed to delete temporary chart file: ${chart.path}`, err);
-        } else {
-          logger.info(`Deleted temporary chart file: ${chart.path}`);
-        }
-      });
-    });
+    charts.forEach(chart => fs.unlink(chart.path, err => { if (err) logger.warn(`Failed to delete chart: ${chart.path}`); }));
 
     logger.info(`=== Completed processing email at: ${emailFolderPath} ===\n`);
-
   } catch (err) {
     logger.error(`Error processing email at "${emailFolderPath}":`, err);
-    process.exit(1); // Exit on error
+    process.exit(1);
   }
 }
 
-// Entry point of the script
 (async () => {
-  const args = process.argv.slice(2); // Retrieve command-line arguments
-
+  const args = process.argv.slice(2);
   if (args.length !== 1) {
     console.error('Usage: node app.js /path/to/email_folder');
     process.exit(1);
   }
 
-  const emailFolderPath = path.resolve(args[0]); // Resolve to absolute path
-
-  // Start processing the specified email
+  const emailFolderPath = path.resolve(args[0]);
   await processEmail(emailFolderPath);
 })();
 

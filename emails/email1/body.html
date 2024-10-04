@@ -9,33 +9,39 @@
     <thead>
       <tr>
         <% if (data.length > 0) { %>
-          <% data[0].columns.forEach(function(column) { %>
-            <th><%= column %></th>
+          <% data[0].fields.forEach(function(field) { %>
+            <th><%= field.name %></th>
           <% }); %>
         <% } %>
       </tr>
     </thead>
     <tbody>
-      <% data.forEach(function(table) { %>
-        <% table.rows.forEach(function(row) { %>
-          <tr>
-            <% row.forEach(function(cell) { %>
-              <td><%= cell %></td>
-            <% }); %>
-          </tr>
-        <% }); %>
+      <% data[0].rows.forEach(function(row) { %>
+        <tr>
+          <% data[0].fields.forEach(function(field) { %>
+            <td><%= row[field.name] %></td>
+          <% }); %>
+        </tr>
       <% }); %>
     </tbody>
   </table>
 
-  <!-- Charts -->
-  <h3>Visual Insights</h3>
-  <% charts.forEach(function(chart) { %>
-    <div class="chart">
-      <h4><%= chart.title %></h4>
-      <img src="cid:<%= chart.cid %>" alt="<%= chart.title %>">
-    </div>
-  <% }); %>
+  <!-- Charts Section -->
+<h3>Visual Insights</h3>
+
+<!-- Time Series Chart for Bike Rides -->
+<div class="chart" style="text-align: center;">
+  <h4>Bike Rides Over Time</h4>
+  <img src="cid:time_series_chart" alt="Bike Rides Over Time" style="max-width: 100%; height: auto; display: inline-block;">
+</div>
+
+<!-- Bar Chart for Bike Types -->
+<div class="chart" style="text-align: center;">
+  <h4>Distribution of Bike Types</h4>
+  <img src="cid:bike_type_chart" alt="Distribution of Bike Types" style="max-width: 100%; height: auto; display: inline-block;">
+</div>
+
+
 </div>
 
 

@@ -1,16 +1,33 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "A pie chart showing category distribution.",
-  "mark": "arc",
+  "description": "A bar chart showing the count of bike types.",
+  "width": 600, 
+  "height": 400,  
+  "data": {
+    "values": []  
+  },
+  "mark": {
+    "type": "bar",
+    "color": "#4682B4"  
+  },
   "encoding": {
-    "theta": {
-      "field": "Count",
-      "type": "quantitative"
+    "x": {
+      "field": "bike_type",
+      "type": "nominal",
+      "title": "Bike Type"
+    },
+    "y": {
+      "field": "N",
+      "type": "quantitative",
+      "title": "Count"
     },
     "color": {
-      "field": "Category",
+      "field": "bike_type",
       "type": "nominal",
-      "title": "Category"
+      "title": "Bike Type",
+      "scale": {
+        "range": ["#FF6347", "#4682B4", "#32CD32"]
+      }
     }
   }
 }

@@ -1,0 +1,44 @@
+{
+  "name": "emailer-project",
+  "version": "1.0.0",
+  "description": "A Node.js application for sending various types of emails with database integrations.",
+  "main": "app/app.js",
+  "scripts": {
+    "start": "node app/app.js",
+    "dev": "nodemon app/app.js",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "email",
+    "mailer",
+    "nodejs",
+    "bigquery",
+    "snowflake",
+    "postgresql",
+    "sqlserver"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/bigquery": "^6.0.0",
+    "canvas": "^2.11.0",
+    "dotenv": "^16.0.3",
+    "ejs": "^3.1.9",
+    "eslint": "^8.32.0",
+    "mssql": "^9.0.1",
+    "nodemailer": "^6.9.1",
+    "pg": "^8.10.0",
+    "snowflake-sdk": "^1.6.14",
+    "vega": "^5.24.0",
+    "vega-lite": "^5.9.0",
+    "winston": "^3.8.2",
+    "winston-daily-rotate-file": "^4.7.1",
+    "xml2js": "^0.4.23"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "eslint": "^8.32.0"
+  }
+}
+
+

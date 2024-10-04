@@ -4,7 +4,22 @@ const bigquery = require('./bigquery');
 const snowflake = require('./snowflake');
 const postgres = require('./postgres');
 const sqlserver = require('./sqlserver');
-// Add other database modules as needed
+const logger = require('../utils/logger');
+
+/**
+ * Logs rows in a table format to the console.
+ * 
+ * @param {Array} rows - The rows of the query result.
+ * @param {Array} fields - The fields (column names) of the query result.
+ */
+function logQueryResultToConsole(rows, fields) {
+  if (rows.length > 0) {
+    console.log('\nQuery Result:');
+    console.table(rows);
+  } else {
+    console.log('\nNo rows returned from query.');
+  }
+}
 
 /**
  * Executes a query based on the system configuration.
@@ -14,19 +29,41 @@ const sqlserver = require('./sqlserver');
  * @returns {Promise<Object>} - The result of the query.
  */
 async function executeQuery(systemConfig, query) {
-  switch (systemConfig.SystemType.toLowerCase()) {
-    case 'bigquery':
-      return await bigquery.queryBigQuery(query);
-    case 'snowflake':
-      return await snowflake.querySnowflake(query);
-    case 'postgres':
-      return await postgres.queryPostgres(query);
-    case 'sqlserver':
-      return await sqlserver.querySqlServer(query);
-    default:
-      throw new Error(`Unsupported system type: ${systemConfig.SystemType}`);
+  let result;
+  
+  try {
+    switch (systemConfig.SystemType.toLowerCase()) {
+      case 'bigquery':
+        result = await bigquery.queryBigQuery(query);
+        break;
+      case 'snowflake':
+        result = await snowflake.querySnowflake(query);
+        break;
+      case 'postgres':
+        result = await postgres.queryPostgres(query);
+        break;
+      case 'sqlserver':
+        result = await sqlserver.querySqlServer(query);
+        break;
+      default:
+        throw new Error(`Unsupported system type: ${systemConfig.SystemType}`);
+    }
+
+    // Extract rows and fields for logging
+    const { rows, fields } = result;
+
+    // Log the query results to the console in a table format
+    logQueryResultToConsole(rows, fields);
+
+    return result;
+
+  } catch (error) {
+    logger.error(`Query Execution Error: ${error.message}`);
+    throw error;
   }
 }
 
 module.exports = { executeQuery };
+
+
 

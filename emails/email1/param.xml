@@ -19,8 +19,8 @@
   <!-- Chart Configurations -->
   <chart>
     <title>Outliers Over Time</title>
-    <queryfile>queries/chart_data.sql</queryfile>
-    <vegafile>vega_config.json</vegafile>
+    <queryfile>queries/timeseries_data.sql</queryfile>
+    <vegafile>timeseries_vega_config.json</vegafile>
   </chart>
   <chart>
     <title>Category Distribution</title>

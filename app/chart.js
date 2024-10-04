@@ -1,56 +1,82 @@
-// app/chart.js
 const fs = require('fs');
 const path = require('path');
 const vega = require('vega');
 const vegaLite = require('vega-lite');
-const { createCanvas, loadImage } = require('canvas'); // Required for rendering charts
+const { createCanvas } = require('canvas'); // Required for rendering charts
 const logger = require('./utils/logger');
 
 /**
+ * Prepares the Vega data by mapping result fields and rows.
+ * Handles various data types such as dates and numbers dynamically.
+ * 
+ * @param {Object} result - The query result from the database containing fields and rows.
+ * @returns {Array} - The data prepared for Vega-Lite specification.
+ */
+function prepareVegaData(result) {
+  return result.rows.map(row => {
+    const processedRow = {};
+
+    result.fields.forEach(field => {
+      let value = row[field.name];
+
+      if (value instanceof Date) {
+        value = value.toISOString().split('T')[0]; // Format dates as YYYY-MM-DD
+      } else if (typeof value === 'object' && value !== null && value.value) {
+        value = value.value; // Handle special types like BigQueryDate
+      } else if (typeof value === 'number') {
+        // Leave numbers as-is
+      } else {
+        value = String(value); // Convert to string by default
+      }
+
+      processedRow[field.name] = value;
+    });
+
+    return processedRow;
+  });
+}
+
+/**
  * Generates a chart image from Vega-Lite specification and data.
- *
- * @param {Object} vegaSpec - The Vega-Lite JSON specification.
- * @param {Array} data - The data to be used in the chart.
+ * 
+ * @param {Object} vegaSpecTemplate - The Vega-Lite JSON specification.
+ * @param {Object} result - The query result containing fields and rows.
  * @param {string} outputPath - The path where the generated chart image will be saved.
  * @returns {Promise<void>}
  */
-function generateChartVegaLite(vegaSpec, data, outputPath) {
+async function generateChart(vegaSpecTemplate, result, outputPath) {
+  const vegaData = prepareVegaData(result);
+
+  const vegaSpec = {
+    ...vegaSpecTemplate,
+    data: { values: vegaData }
+  };
+
   return new Promise((resolve, reject) => {
     try {
-      // Add data to Vega-Lite spec
-      vegaSpec.data = { values: data };
-      
-      // Compile the Vega-Lite specification into a Vega spec
-      const vegaCompiledSpec = vegaLite.compile(vegaSpec).spec;
-
-      // Create a new Vega View instance for rendering
-      const runtime = vega.parse(vegaCompiledSpec);
+      const compiledSpec = vegaLite.compile(vegaSpec).spec;
+      const runtime = vega.parse(compiledSpec);
       const view = new vega.View(runtime)
-        .renderer('none') // We use the 'none' renderer since we'll output to canvas
+        .renderer('none')
         .initialize();
 
-      // Render the chart to a canvas and save as PNG
-      view.toCanvas()
-        .then((canvas) => {
-          // Ensure the output directory exists
-          const outputDir = path.dirname(outputPath);
-          if (!fs.existsSync(outputDir)) {
-            fs.mkdirSync(outputDir, { recursive: true });
-          }
+      view.toCanvas().then(canvas => {
+        const outputDir = path.dirname(outputPath);
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
 
-          // Save the PNG to the specified output path
-          const out = fs.createWriteStream(outputPath);
-          const stream = canvas.createPNGStream();
-          stream.pipe(out);
-          out.on('finish', () => {
-            logger.info(`Chart generated successfully at ${outputPath}`);
-            resolve();
-          });
-        })
-        .catch((error) => {
-          logger.error('Error generating chart with Vega-Lite:', error);
-          reject(error);
+        const out = fs.createWriteStream(outputPath);
+        const stream = canvas.createPNGStream();
+        stream.pipe(out);
+        out.on('finish', () => {
+          logger.info(`Chart generated successfully at ${outputPath}`);
+          resolve();
         });
+      }).catch(error => {
+        logger.error('Error generating chart with Vega-Lite:', error);
+        reject(error);
+      });
     } catch (error) {
       logger.error('Error compiling Vega-Lite specification:', error);
       reject(error);
@@ -58,7 +84,6 @@ function generateChartVegaLite(vegaSpec, data, outputPath) {
   });
 }
 
-module.exports = { generateChartVegaLite };
-
+module.exports = { generateChart };
 
 

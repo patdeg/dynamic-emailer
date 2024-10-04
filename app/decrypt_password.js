@@ -3,7 +3,7 @@
  * @description Utility script to decrypt passwords using the decryption function for testing/debugging.
  */
 
-const { decrypt } = require('./config');
+const { decrypt } = require('./encrypt'); // Import the decrypt function
 const readline = require('readline');
 const dotenv = require('dotenv');
 const path = require('path');

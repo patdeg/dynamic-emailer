@@ -6,23 +6,19 @@
 const nodemailer = require('nodemailer');
 const logger = require('./utils/logger');
 const { readConfig } = require('./config');
+const dotenv = require('dotenv');
 
-// Get SMTP configuration from the configurations
-const smtpConfig = readConfig().find(conf => conf.SystemType.toLowerCase() === 'smtp');
-
-if (!smtpConfig) {
-  logger.error('SMTP configuration not found in the configurations.');
-  process.exit(1);
-}
+// Load environment variables from the `.env` file
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // Create a transporter object using SMTP configuration
 const transporter = nodemailer.createTransport({
-  host: smtpConfig.Host,
-  port: smtpConfig.Port,
-  secure: smtpConfig.Secure || false, // true for 465, false for other ports
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: process.env.SMTP_SECURE || false, // true for 465, false for other ports
   auth: {
-    user: smtpConfig.Username,
-    pass: smtpConfig.Password,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
   logger: true, // Enable built-in Nodemailer logging
   debug: true, // Show debug output

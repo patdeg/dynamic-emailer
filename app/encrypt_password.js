@@ -3,7 +3,7 @@
  * @description Utility script to encrypt passwords using the encryption functions. Password input is masked.
  */
 
-const { encrypt } = require('./config');
+const { encrypt } = require('./encrypt');  // Import the encrypt function
 const readlineSync = require('readline-sync');  // For masked input
 const dotenv = require('dotenv');
 const path = require('path');

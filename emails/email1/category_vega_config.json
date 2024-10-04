@@ -1,25 +1,42 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "description": "A bar chart showing the count of bike types.",
-  "width": 600, 
-  "height": 400,  
+  "width": 600,
+  "height": 400,
+  "config": {
+    "axis": {
+      "labelFont": "Arial",
+      "labelFontSize": 11,
+      "titleFont": "Arial",
+      "titleFontSize": 13,
+      "grid": false
+    }
+  },
   "data": {
-    "values": []  
+    "values": []
   },
   "mark": {
     "type": "bar",
-    "color": "#4682B4"  
+    "color": "#4682B4"
   },
   "encoding": {
     "x": {
       "field": "bike_type",
       "type": "nominal",
-      "title": "Bike Type"
+      "title": "Bike Type",
+      "axis": {
+        "labelAngle": 0 
+      }
     },
     "y": {
       "field": "N",
       "type": "quantitative",
-      "title": "Count"
+      "title": "Count",
+      "axis": {
+        "titleAngle": 0,
+        "titleX": 0,
+        "titleY": -10
+      }
     },
     "color": {
       "field": "bike_type",
@@ -31,5 +48,4 @@
     }
   }
 }
-
 

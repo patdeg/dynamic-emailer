@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 const logger = require('./utils/logger');
 const { readConfig } = require('./config');
 const dotenv = require('dotenv');
+const path = require('path');
 
 // Load environment variables from the `.env` file
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -15,7 +16,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: process.env.SMTP_PORT,
-  secure: process.env.SMTP_SECURE || false, // true for 465, false for other ports
+  secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -42,7 +43,7 @@ transporter.verify(function(error, success) {
  */
 async function sendEmail(to, subject, htmlBody, attachments = []) {
   const mailOptions = {
-    from: smtpConfig.FromAddress || `"Emailer.js" <${smtpConfig.Username}>`, // Sender address
+    from: process.env.SMTP_HOST, // Sender address
     to: to, // List of recipients (comma-separated or array)
     subject: subject, // Subject line
     html: htmlBody, // HTML body content
@@ -52,8 +53,8 @@ async function sendEmail(to, subject, htmlBody, attachments = []) {
   try {
     let info = await transporter.sendMail(mailOptions);
     logger.info('Email sent:', info.messageId);
-  } catch (error) {
-    logger.error('Error sending email:', error);
+  } catch (err) {
+    logger.error('Error sending email:', err);
     logger.error(`Stack trace: ${err.stack}`);
 	  throw error; // Re-throw the error after logging
   }

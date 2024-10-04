@@ -66,7 +66,7 @@ async function generateChart(vegaSpecTemplate, result, outputPath) {
       const compiledSpec = vegaLite.compile(vegaSpec).spec;
       const runtime = vega.parse(compiledSpec);
       const view = new vega.View(runtime)
-        .renderer('none')
+        .renderer('canvas')  // Use 'canvas' to generate PNG
         .initialize();
 
       view.toCanvas().then(canvas => {
@@ -76,21 +76,19 @@ async function generateChart(vegaSpecTemplate, result, outputPath) {
         }
 
         const out = fs.createWriteStream(outputPath);
-        const stream = canvas.createPNGStream();
+        const stream = canvas.createPNGStream();  // Create PNG stream
         stream.pipe(out);
         out.on('finish', () => {
-          logger.info(`Chart generated successfully at ${outputPath}`);
+          logger.info(`Chart generated successfully as PNG at ${outputPath}`);
           resolve();
         });
       }).catch(error => {
-        logger.error('Error generating chart with Vega-Lite:', error);
-    logger.error(`Stack trace: ${err.stack}`);
-	      reject(error);
+        logger.error('Error generating PNG with Vega-Lite:', error);
+        reject(error);
       });
     } catch (error) {
       logger.error('Error compiling Vega-Lite specification:', error);
-    logger.error(`Stack trace: ${err.stack}`);
-	    reject(error);
+      reject(error);
     }
   });
 }

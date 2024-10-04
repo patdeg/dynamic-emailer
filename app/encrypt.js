@@ -3,6 +3,11 @@
  * @description Module for encrypting and decrypting text using AES-256-CBC encryption.
  */
 const crypto = require('crypto');
+const dotenv = require('dotenv');
+const path = require('path');
+
+// Load .env variables
+dotenv.config({ path: path.resolve(__dirname, '../.env') }); // Adjust path if necessary
 
 // Ensure the encryption key is set in environment variables
 const ENCRYPTION_KEY = crypto.createHash('sha256').update(String(process.env.ENCRYPTION_KEY)).digest('base64').substr(0, 32);

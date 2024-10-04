@@ -7,7 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { encrypt, decrypt } = require('./config');
+const { encrypt, decrypt } = require('./encrypt');
 const logger = require('./utils/logger');
 const dotenv = require('dotenv');
 

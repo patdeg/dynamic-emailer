@@ -2,11 +2,20 @@
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "description": "A line chart showing outliers over time.",
   "width": 600,
-  "height": 400, 
+  "height": 400,
+  "config": {
+    "axis": {
+      "labelFont": "Arial",
+      "labelFontSize": 11,
+      "titleFont": "Arial",
+      "titleFontSize": 13,
+      "grid": false 
+    }
+  },
   "mark": {
     "type": "line",
-    "color": "#FF6347",  
-    "strokeWidth": 3 
+    "color": "#FF6347",
+    "strokeWidth": 3
   },
   "encoding": {
     "x": {
@@ -17,7 +26,12 @@
     "y": {
       "field": "N",
       "type": "quantitative",
-      "title": "Actuals"
+      "title": "Actuals",
+      "axis": {
+        "titleAngle": 0, 
+        "titleX": 0,   
+        "titleY": -10    
+      }
     }
   }
 }

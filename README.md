@@ -38,11 +38,15 @@
    Create a `.env` file in the root directory with the following variables:
 
    ```bash
+   EMAILER_CONFIG=/path/to/.emailer_credentials
    ENCRYPTION_KEY=your_encryption_key
-   GMAIL_USER=your_gmail_user
-   GMAIL_PASS=your_gmail_password
-   BIGQUERY_PROJECT_ID=your_bigquery_project_id
-   BIGQUERY_KEYFILE=path/to/your_bigquery_keyfile.json
+
+   # SMTP configuration (using Gmail as an example)
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your_email@gmail.com
+   SMTP_PASS=your_app_password_from_gmail
+   SMTP_FROM='"Your Name" <your_email@gmail.com>'
    ```
 
 4. **Configure Emailer Credentials:**
@@ -58,14 +62,7 @@
        "SystemType": "bigquery",
        "ProjectId": "your_project_id",
        "KeyFile": "path/to/keyfile.json"
-     },
-     {
-       "System": "SMTP",
-       "SystemType": "smtp",
-       "Host": "smtp.your-email.com",
-       "Port": 587,
-       "Username": "your_username",
-       "Password": "encrypted_password"
+       "Email": "emailer@your_project_id.iam.gserviceaccount.com"
      }
    ]
    ```

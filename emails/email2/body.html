@@ -1,0 +1,63 @@
+  <p>Dear EnderForce Team,</p>
+  <p>Please find below the latest reports:</p>
+
+  <h3>Permissions</h3>
+  <table border="1" cellpadding="5" cellspacing="0">
+   <thead>
+    <tr>
+        <!-- Manually select the first two column headers -->
+        <th><%= data[0].columns[0] %></th>
+        <th><%= data[0].columns[1] %></th>
+        <th><%= data[0].columns[2] %></th>
+        <th><%= data[0].columns[3] %></th>
+        <th><%= data[0].columns[4] %></th>
+        <th><%= data[0].columns[5] %></th>
+    </tr>
+  </thead>
+  <tbody>
+      <% data[0].rows.forEach(function(row) { %>
+        <tr>
+          <td><%= row.username %></td>
+	  <td><%= row.primary_group %></td>
+          <td><%= row.permission %></td>
+          <td><%= row.value %></td>
+          <td><%= row.server %></td>
+          <td><%= row.world %></td>
+        </tr>
+      <% }); %>
+  </tbody>
+</table>
+
+<h3>Group Permissions</h3>
+<table border="1" cellpadding="5" cellspacing="0">
+  <thead>
+    <tr>
+      <% data[1].columns.forEach(function(column) { %>
+        <th><%= column %></th>
+      <% }); %>
+    </tr>
+  </thead>
+  <tbody>
+    <% data[1].rows.forEach(function(row) { %>
+      <tr>
+        <% data[1].columns.forEach(function(column) { %>
+          <td><%= row[column] %></td>
+        <% }); %>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>
+
+<!-- Distribution of Actions -->
+<div class="chart" style="text-align: center;">
+  <h3>Actions Distribution</h3>
+  <img src="cid:action_dist_chart" style="max-width: 100%; height: auto; display: inline-block;">
+</div>
+
+<!-- Timeseries of Actions last 7 days -->
+<div class="chart" style="text-align: center;">
+  <h2>Time series of Actions for last 7 days </h2>
+  <img src="cid:timeseries_actions_chart" style="max-width: 100%; height: auto; display: inline-block;">
+</div>
+
+

@@ -56,7 +56,7 @@ async function sendEmail(to, subject, htmlBody, attachments = []) {
   } catch (err) {
     logger.error('Error sending email:', err);
     logger.error(`Stack trace: ${err.stack}`);
-	  throw error; // Re-throw the error after logging
+    throw err; // Re-throw the error after logging
   }
 }
 

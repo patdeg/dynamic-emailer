@@ -1,0 +1,37 @@
+<!-- emails/email1/param.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter>
+  <name>EnderForce Daily Report</name>
+  <to>
+	  <email>pdeglon@gmail.com</email>
+  </to>
+  <defaultsystem>MySQL3</defaultsystem>
+  <preview>This is your daily email report - PROTOTYPE</preview>
+
+  <!-- Data Queries -->
+  <data>
+	  <queryfile>queries/permissions.sql</queryfile>
+  </data>
+  <data>
+	  <queryfile>queries/group_permissions.sql</queryfile>
+  </data>
+
+  <!-- Chart Configurations -->
+  <chart>
+  <title>Actions distribution</title>
+  <queryfile>queries/actions_dist.sql</queryfile>
+  <vegafile>queries/actions_dist.json</vegafile>
+  <cid>action_dist_chart</cid>
+</chart>
+<chart>
+  <title>Timeseries of Actions</title>
+  <queryfile>queries/timeseries_actions.sql</queryfile>
+  <vegafile>queries/timeseries_actions.json</vegafile>
+  <cid>timeseries_actions_chart</cid>
+</chart>
+
+  <format>html</format>
+  <importance>High</importance>
+</parameter>
+
+

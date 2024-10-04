@@ -9,7 +9,7 @@ SYMBOL ?= UNH
 # Default task: Run the application with a sample email configuration
 test:
 	# Execute the main application script with a sample email configuration
-	node app/app.js emails/email1
+	node app/app.js emails/email2
 
 # Task to copy all project code to the clipboard (excluding test and package files)
 showcode:

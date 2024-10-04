@@ -126,11 +126,12 @@ async function processEmail(emailFolderPath) {
         logger.info('Generating chart data...');
         await generateChart(vegaSpec, result, chartFilePath);
 
-        charts.push({
-          title: chartItem.title || 'Chart',
-          cid: chartFileName,
-          path: chartFilePath,
+	charts.push({
+          title: chartItem.title || 'Chart',     // Chart title from param.xml or default
+          cid: chartItem.cid[0] || chartFileName, // cid from param.xml or fallback to chartFileName
+          path: chartFilePath,                   // Path to the generated chart file
         });
+
       }
     }
 

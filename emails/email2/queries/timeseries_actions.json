@@ -1,0 +1,46 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "A line chart showing actions over time by category.",
+  "width": 600,
+  "height": 400,
+  "config": {
+    "axis": {
+      "labelFont": "Arial",
+      "labelFontSize": 11,
+      "titleFont": "Arial",
+      "titleFontSize": 13,
+      "grid": false
+    }
+  },
+  "mark": {
+    "type": "line",
+    "strokeWidth": 3
+  },
+  "encoding": {
+    "x": {
+      "field": "action_date",
+      "type": "temporal",
+      "title": "Date"
+    },
+    "y": {
+      "field": "N",
+      "type": "quantitative",
+      "title": "Number of Actions",
+      "axis": {
+        "titleAngle": 0,
+        "titleX": 0,
+        "titleY": -10
+      }
+    },
+    "color": {
+      "field": "category",
+      "type": "nominal",
+      "title": "Category",
+      "scale": {
+        "range": ["#FF6347", "#4682B4", "#32CD32"]
+      }
+    }
+  }
+}
+
+

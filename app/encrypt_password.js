@@ -1,16 +1,20 @@
-// encrypt_password.js
+/**
+ * @file encrypt_password.js
+ * @description Utility script to encrypt passwords using the encryption functions. Password input is masked.
+ */
+
 const { encrypt } = require('./config');
-const readline = require('readline');
+const readlineSync = require('readline-sync');  // For masked input
+const dotenv = require('dotenv');
+const path = require('path');
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+// Load .env variables
+dotenv.config({ path: path.resolve(__dirname, '../.env') }); // Adjust path if necessary
 
-rl.question('Enter the plain password to encrypt: ', (password) => {
-  const encryptedPassword = encrypt(password);
-  console.log('Encrypted Password:', encryptedPassword);
-  rl.close();
-});
+// Prompt for the password, masking the input
+const password = readlineSync.question('Enter the plain password to encrypt: ', { hideEchoBack: true });
+
+const encryptedPassword = encrypt(password);
+console.log('Encrypted Password:', encryptedPassword);
 
 

@@ -1,3 +1,9 @@
+/**
+ * @file app.js
+ * @description Main application file for Emailer.js. Processes email configurations, executes queries,
+ * generates charts, compiles templates, and sends emails.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const xml2js = require('xml2js');
@@ -8,20 +14,32 @@ const { sendEmail } = require('./email');
 const { generateChart } = require('./chart');
 const logger = require('./utils/logger');
 
+/**
+ * Resolves a sequence of path segments into an absolute path.
+ * @param {...string} segments - Path segments to resolve.
+ * @returns {string} - The resolved absolute path.
+ */
 function resolvePath(...segments) {
   return path.join(...segments);
 }
 
+/**
+ * Processes an email configuration folder, executes queries, generates charts,
+ * compiles templates, and sends the email.
+ * @param {string} emailFolderPath - Path to the email configuration folder.
+ */
 async function processEmail(emailFolderPath) {
   try {
     logger.info(`\n=== Processing email at: ${emailFolderPath} ===`);
 
+    // Define paths to essential files
     const paramXmlPath = resolvePath(emailFolderPath, 'param.xml');
     const templatePath = resolvePath(emailFolderPath, 'template.html');
     const headerPath = resolvePath(emailFolderPath, 'header.html');
     const bodyPath = resolvePath(emailFolderPath, 'body.html');
     const footerPath = resolvePath(emailFolderPath, 'footer.html');
 
+    // Check if all essential files exist
     const essentialFiles = [paramXmlPath, templatePath, headerPath, bodyPath, footerPath];
     essentialFiles.forEach(filePath => {
       if (!fs.existsSync(filePath)) {
@@ -29,32 +47,38 @@ async function processEmail(emailFolderPath) {
       }
     });
 
+    // Read and parse param.xml
     const paramXml = fs.readFileSync(paramXmlPath, 'utf8');
     const parser = new xml2js.Parser();
     const param = await parser.parseStringPromise(paramXml);
     const parameter = param.parameter;
 
+    // Extract email parameters
     const name = parameter.name[0];
     const toEmails = parameter.to.map(emailObj => emailObj.email[0]);
     const system = parameter.system[0];
     const preview = parameter.preview[0];
     const format = parameter.format ? parameter.format[0] : 'html';
 
+    // Read template files
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
     const headerHtml = fs.readFileSync(headerPath, 'utf8');
     const bodyHtml = fs.readFileSync(bodyPath, 'utf8');
     const footerHtml = fs.readFileSync(footerPath, 'utf8');
 
+    // Combine templates into one
     const augmentedTemplate = templateHtml
       .replace('<!-- Header Section -->', headerHtml)
       .replace('<!-- Body Section -->', bodyHtml)
       .replace('<!-- Footer Section -->', footerHtml);
 
+    // Get system configuration
     const systemConfig = readConfig().find(conf => conf.System.toLowerCase() === system.toLowerCase());
     if (!systemConfig) {
       throw new Error(`System configuration not found for: ${system}`);
     }
 
+    // Execute data queries
     const dataResults = [];
     if (parameter.data) {
       for (const dataItem of parameter.data) {
@@ -67,6 +91,7 @@ async function processEmail(emailFolderPath) {
       }
     }
 
+    // Generate charts
     const charts = [];
     if (parameter.chart) {
       for (const chartItem of parameter.chart) {
@@ -86,9 +111,7 @@ async function processEmail(emailFolderPath) {
           continue;
         }
 
-        logger.info('Vega data:');
-        logger.info(result.rows); // Logs data before chart generation
-
+        logger.info('Generating chart data...');
         await generateChart(vegaSpec, result, chartFilePath);
 
         charts.push({
@@ -99,6 +122,7 @@ async function processEmail(emailFolderPath) {
       }
     }
 
+    // Compile the email template with data and charts
     const compiledTemplate = ejs.render(augmentedTemplate, {
       subject: name,
       data: dataResults,
@@ -106,20 +130,20 @@ async function processEmail(emailFolderPath) {
       now: new Date().toLocaleString(),
     });
 
-    const attachments = charts.map(chart => {
-      if (Array.isArray(chart.path)) {
-        logger.error(`Chart path is an array: ${JSON.stringify(chart.path)}`);
-        chart.path = chart.path[0]; // Handle arrays by selecting the first item
-      }
-      return {
-        filename: chart.cid,
-        path: chart.path,
-        cid: chart.cid,
-      };
-    });
+    // Prepare attachments for email
+    const attachments = charts.map(chart => ({
+      filename: chart.cid,
+      path: chart.path,
+      cid: chart.cid,
+    }));
 
+    // Send the email
     await sendEmail(toEmails, name, compiledTemplate, attachments);
-    charts.forEach(chart => fs.unlink(chart.path, err => { if (err) logger.warn(`Failed to delete chart: ${chart.path}`); }));
+
+    // Clean up chart images
+    charts.forEach(chart => fs.unlink(chart.path, err => {
+      if (err) logger.warn(`Failed to delete chart: ${chart.path}`);
+    }));
 
     logger.info(`=== Completed processing email at: ${emailFolderPath} ===\n`);
   } catch (err) {
@@ -129,6 +153,7 @@ async function processEmail(emailFolderPath) {
   }
 }
 
+// Entry point
 (async () => {
   const args = process.argv.slice(2);
   if (args.length !== 1) {

@@ -1,4 +1,7 @@
-// app/database/index.js
+/**
+ * @file index.js
+ * @description Main database module that routes queries to the appropriate database handler based on system configuration.
+ */
 
 const bigquery = require('./bigquery');
 const snowflake = require('./snowflake');
@@ -8,7 +11,6 @@ const logger = require('../utils/logger');
 
 /**
  * Logs rows in a table format to the console.
- * 
  * @param {Array} rows - The rows of the query result.
  * @param {Array} fields - The fields (column names) of the query result.
  */
@@ -23,7 +25,6 @@ function logQueryResultToConsole(rows, fields) {
 
 /**
  * Executes a query based on the system configuration.
- *
  * @param {Object} systemConfig - Configuration object for the system.
  * @param {string} query - The SQL query to execute.
  * @returns {Promise<Object>} - The result of the query.
@@ -34,16 +35,16 @@ async function executeQuery(systemConfig, query) {
   try {
     switch (systemConfig.SystemType.toLowerCase()) {
       case 'bigquery':
-        result = await bigquery.queryBigQuery(query);
+        result = await bigquery.queryBigQuery(systemConfig, query);
         break;
       case 'snowflake':
-        result = await snowflake.querySnowflake(query);
+        result = await snowflake.querySnowflake(systemConfig, query);
         break;
       case 'postgres':
-        result = await postgres.queryPostgres(query);
+        result = await postgres.queryPostgres(systemConfig, query);
         break;
       case 'sqlserver':
-        result = await sqlserver.querySqlServer(query);
+        result = await sqlserver.querySqlServer(systemConfig, query);
         break;
       default:
         throw new Error(`Unsupported system type: ${systemConfig.SystemType}`);
@@ -64,6 +65,5 @@ async function executeQuery(systemConfig, query) {
 }
 
 module.exports = { executeQuery };
-
 
 

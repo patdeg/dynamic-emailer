@@ -1,24 +1,25 @@
-// app/database/snowflake.js
+/**
+ * @file snowflake.js
+ * @description Module for executing queries against Snowflake.
+ */
 
 const snowflake = require('snowflake-sdk');
-const logger = require('../utils/logger'); // Ensure logger.js is properly implemented
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+const logger = require('../utils/logger');
 
 /**
  * Establishes a connection to Snowflake.
- *
- * @returns {snowflake.Connection} - Snowflake connection object.
+ * @param {Object} systemConfig - The system configuration for Snowflake.
+ * @returns {Promise<snowflake.Connection>} - Snowflake connection object.
  */
-function createConnection() {
+function createConnection(systemConfig) {
   const connection = snowflake.createConnection({
-    account: process.env.SNOWFLAKE_ACCOUNT, // e.g., 'xy12345.east-us-2.azure'
-    username: process.env.SNOWFLAKE_USERNAME,
-    password: process.env.SNOWFLAKE_PASSWORD,
-    warehouse: process.env.SNOWFLAKE_WAREHOUSE, // Optional
-    database: process.env.SNOWFLAKE_DATABASE, // Optional
-    schema: process.env.SNOWFLAKE_SCHEMA, // Optional
-    role: process.env.SNOWFLAKE_ROLE, // Optional
+    account: systemConfig.Account,
+    username: systemConfig.Username,
+    password: systemConfig.Password,
+    warehouse: systemConfig.Warehouse,
+    database: systemConfig.Database,
+    schema: systemConfig.Schema,
+    role: systemConfig.Role,
   });
 
   return new Promise((resolve, reject) => {
@@ -36,14 +37,14 @@ function createConnection() {
 
 /**
  * Executes a query on Snowflake.
- *
+ * @param {Object} systemConfig - The system configuration for Snowflake.
  * @param {string} query - The SQL query to execute.
  * @returns {Promise<Object>} - Resolves with query results.
  */
-async function executeQuery(query) {
+async function querySnowflake(systemConfig, query) {
   let connection;
   try {
-    connection = await createConnection();
+    connection = await createConnection(systemConfig);
   } catch (err) {
     throw new Error('Snowflake connection failed: ' + err.message);
   }
@@ -66,7 +67,6 @@ async function executeQuery(query) {
 
 /**
  * Closes the Snowflake connection.
- *
  * @param {snowflake.Connection} connection - The Snowflake connection to close.
  * @returns {Promise<void>}
  */
@@ -84,6 +84,6 @@ function closeConnection(connection) {
   });
 }
 
-module.exports = { executeQuery, closeConnection };
+module.exports = { querySnowflake, closeConnection };
 
 

@@ -1,43 +1,13 @@
+/**
+ * @file bigquery.js
+ * @description Module for executing queries against Google BigQuery.
+ */
+
 const { BigQuery, BigQueryDate } = require('@google-cloud/bigquery');
 const logger = require('../utils/logger');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-
-// Initialize BigQuery client
-const bigquery = new BigQuery({
-  projectId: process.env.BIGQUERY_PROJECT_ID,
-  keyFilename: process.env.BIGQUERY_KEYFILE,
-});
-
-
-function prepareVegaData(result) {
-  return result.rows.map(row => {
-    const processedRow = {};
-
-    // Handle all fields dynamically
-    result.fields.forEach(field => {
-      let value = row[field.name];
-
-      if (value instanceof BigQueryDate) {
-        value = value.value;
-      } else if (value instanceof Date) {
-        value = value.toISOString().split('T')[0];
-      } else if (typeof value === 'number') {
-        // Leave numbers as-is
-      } else {
-        value = String(value);
-      }
-
-      processedRow[field.name] = value;
-    });
-
-    return processedRow;
-  });
-}
 
 /**
- * Function to convert BigQueryDate to string and handle any potential issues with undefined values.
- *
+ * Processes BigQuery rows, converting BigQueryDate to string and handling undefined values.
  * @param {Array} rows - The rows returned from the BigQuery query.
  * @param {Array} fields - The fields (schema) returned from the query.
  * @returns {Array} - Processed rows with BigQueryDate converted to string and other values handled.
@@ -47,7 +17,7 @@ function processBigQueryRows(rows, fields) {
     const processedRow = {};
 
     fields.forEach((field) => {
-      const value = row[field.name];
+      let value = row[field.name];
 
       if (value instanceof BigQueryDate) {
         // Convert BigQueryDate to a string
@@ -68,17 +38,23 @@ function processBigQueryRows(rows, fields) {
 
 /**
  * Executes a BigQuery SQL query using the query() method.
- *
+ * @param {Object} systemConfig - The system configuration for BigQuery.
  * @param {string} query - The SQL query to execute.
  * @returns {Promise<Object>} - The result of the query, including fields and processed rows.
  */
-async function queryBigQuery(query) {
+async function queryBigQuery(systemConfig, query) {
   try {
+    // Initialize BigQuery client with systemConfig
+    const bigquery = new BigQuery({
+      projectId: systemConfig.ProjectId,
+      keyFilename: systemConfig.KeyFile,
+    });
+
     logger.info(`Executing BigQuery: ${query}`);
 
     const options = {
       query: query,
-      location: 'US', // Adjust as per your dataset's location
+      location: systemConfig.Location || 'US', // Use location from systemConfig or default to 'US'
       useLegacySql: false,
     };
 

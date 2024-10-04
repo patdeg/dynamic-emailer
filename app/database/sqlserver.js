@@ -1,34 +1,34 @@
-// app/database/sqlserver.js
+/**
+ * @file sqlserver.js
+ * @description Module for executing queries against SQL Server.
+ */
 
 const sql = require('mssql');
 const logger = require('../utils/logger');
 
 /**
  * Executes a SQL Server SQL query.
- *
- * @param {string} host - The SQL Server host.
- * @param {string} user - The SQL Server user.
- * @param {string} password - The SQL Server password.
- * @param {string} database - The SQL Server database name.
- * @param {string} query - The SQL query to execute.
+ * @param {Object} systemConfig - The system configuration for SQL Server.
+ * @param {string} queryText - The SQL query to execute.
  * @returns {Promise<Object>} - The query result.
  */
-async function query(host, user, password, database, query) {
+async function querySqlServer(systemConfig, queryText) {
   const config = {
-    user: user,
-    password: password,
-    server: host,
-    database: database,
+    user: systemConfig.Username,
+    password: systemConfig.Password,
+    server: systemConfig.Host,
+    database: systemConfig.Database,
+    port: systemConfig.Port || 1433,
     options: {
-      encrypt: true, // Use this if you're on Windows Azure
-      trustServerCertificate: true, // Change to true for local dev / self-signed certs
+      encrypt: systemConfig.Encrypt || true,
+      trustServerCertificate: systemConfig.TrustServerCertificate || true,
     },
   };
   
   try {
     let pool = await sql.connect(config);
     logger.info('Connected to SQL Server.');
-    let result = await pool.request().query(query);
+    let result = await pool.request().query(queryText);
     logger.info('SQL Server query executed successfully.');
     return { rows: result.recordset, fields: result.columns };
   } catch (error) {
@@ -40,6 +40,6 @@ async function query(host, user, password, database, query) {
   }
 }
 
-module.exports = { query };
+module.exports = { querySqlServer };
 
 

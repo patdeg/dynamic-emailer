@@ -1,4 +1,7 @@
-// app/utils/logger.js
+/**
+ * @file logger.js
+ * @description Custom logger using Winston for consistent logging across the application.
+ */
 
 const { createLogger, format, transports } = require('winston');
 const path = require('path');

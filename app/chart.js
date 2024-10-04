@@ -1,27 +1,29 @@
+/**
+ * @file chart.js
+ * @description Module for generating charts using Vega-Lite specifications.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const vega = require('vega');
 const vegaLite = require('vega-lite');
-const { createCanvas } = require('canvas'); // Required for rendering charts
+const { createCanvas } = require('canvas');
 const logger = require('./utils/logger');
 
 /**
  * Prepares the Vega data by mapping result fields and rows.
  * Handles various data types such as dates and numbers dynamically.
- * 
  * @param {Object} result - The query result from the database containing fields and rows.
- * @returns {Array} - The data prepared for Vega-Lite specification.
+ * @returns {Array<Object>} - The data prepared for Vega-Lite specification.
  */
 function prepareVegaData(result) {
-
   if (!result.rows || !result.fields) {
     logger.error('Result is missing rows or fields.');
     return [];
   }
-	logger.info(`Preparing Vega data. Rows: ${result.rows.length}, Fields: ${result.fields.length}`);
+  logger.info(`Preparing Vega data. Rows: ${result.rows.length}, Fields: ${result.fields.length}`);
 
-
-	return result.rows.map(row => {
+  return result.rows.map(row => {
     const processedRow = {};
 
     result.fields.forEach(field => {
@@ -46,7 +48,6 @@ function prepareVegaData(result) {
 
 /**
  * Generates a chart image from Vega-Lite specification and data.
- * 
  * @param {Object} vegaSpecTemplate - The Vega-Lite JSON specification.
  * @param {Object} result - The query result containing fields and rows.
  * @param {string} outputPath - The path where the generated chart image will be saved.
@@ -83,11 +84,13 @@ async function generateChart(vegaSpecTemplate, result, outputPath) {
         });
       }).catch(error => {
         logger.error('Error generating chart with Vega-Lite:', error);
-        reject(error);
+    logger.error(`Stack trace: ${err.stack}`);
+	      reject(error);
       });
     } catch (error) {
       logger.error('Error compiling Vega-Lite specification:', error);
-      reject(error);
+    logger.error(`Stack trace: ${err.stack}`);
+	    reject(error);
     }
   });
 }

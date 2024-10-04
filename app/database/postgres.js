@@ -1,30 +1,31 @@
-// app/database/postgres.js
+/**
+ * @file postgres.js
+ * @description Module for executing queries against PostgreSQL.
+ */
 
 const { Client } = require('pg');
 const logger = require('../utils/logger');
 
 /**
  * Executes a PostgreSQL SQL query.
- *
- * @param {string} host - The PostgreSQL host.
- * @param {string} user - The PostgreSQL user.
- * @param {string} password - The PostgreSQL password.
- * @param {string} database - The PostgreSQL database name.
- * @param {string} query - The SQL query to execute.
+ * @param {Object} systemConfig - The system configuration for PostgreSQL.
+ * @param {string} queryText - The SQL query to execute.
  * @returns {Promise<Object>} - The query result.
  */
-async function query(host, user, password, database, query) {
+async function queryPostgres(systemConfig, queryText) {
   const client = new Client({
-    host,
-    user,
-    password,
-    database,
+    host: systemConfig.Host,
+    user: systemConfig.Username,
+    password: systemConfig.Password,
+    database: systemConfig.Database,
+    port: systemConfig.Port || 5432,
+    ssl: systemConfig.SSL || false,
   });
   
   try {
     await client.connect();
     logger.info('Connected to PostgreSQL.');
-    const res = await client.query(query);
+    const res = await client.query(queryText);
     logger.info('PostgreSQL query executed successfully.');
     return { rows: res.rows, fields: res.fields };
   } catch (error) {
@@ -36,6 +37,6 @@ async function query(host, user, password, database, query) {
   }
 }
 
-module.exports = { query };
+module.exports = { queryPostgres };
 
 

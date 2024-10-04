@@ -1,15 +1,28 @@
-// app/email.js
+/**
+ * @file email.js
+ * @description Module for sending emails using Nodemailer.
+ */
+
 const nodemailer = require('nodemailer');
 const logger = require('./utils/logger');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const { readConfig } = require('./config');
 
-// Create a transporter object using SMTP (configured for Gmail)
+// Get SMTP configuration from the configurations
+const smtpConfig = readConfig().find(conf => conf.SystemType.toLowerCase() === 'smtp');
+
+if (!smtpConfig) {
+  logger.error('SMTP configuration not found in the configurations.');
+  process.exit(1);
+}
+
+// Create a transporter object using SMTP configuration
 const transporter = nodemailer.createTransport({
-  service: 'Gmail',
+  host: smtpConfig.Host,
+  port: smtpConfig.Port,
+  secure: smtpConfig.Secure || false, // true for 465, false for other ports
   auth: {
-    user: process.env.GMAIL_USER, // Your Gmail address
-    pass: process.env.GMAIL_PASS, // Your Gmail App Password
+    user: smtpConfig.Username,
+    pass: smtpConfig.Password,
   },
   logger: true, // Enable built-in Nodemailer logging
   debug: true, // Show debug output
@@ -26,7 +39,6 @@ transporter.verify(function(error, success) {
 
 /**
  * Sends an email using the configured SMTP transporter.
- *
  * @param {Array|string} to - Recipient email addresses.
  * @param {string} subject - Subject of the email.
  * @param {string} htmlBody - HTML content of the email.
@@ -34,7 +46,7 @@ transporter.verify(function(error, success) {
  */
 async function sendEmail(to, subject, htmlBody, attachments = []) {
   const mailOptions = {
-    from: `"Patrick Deglon" <${process.env.GMAIL_USER}>`, // Sender address
+    from: smtpConfig.FromAddress || `"Emailer.js" <${smtpConfig.Username}>`, // Sender address
     to: to, // List of recipients (comma-separated or array)
     subject: subject, // Subject line
     html: htmlBody, // HTML body content
@@ -46,7 +58,8 @@ async function sendEmail(to, subject, htmlBody, attachments = []) {
     logger.info('Email sent:', info.messageId);
   } catch (error) {
     logger.error('Error sending email:', error);
-    throw error; // Re-throw the error after logging
+    logger.error(`Stack trace: ${err.stack}`);
+	  throw error; // Re-throw the error after logging
   }
 }
 

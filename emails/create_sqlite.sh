@@ -1,5 +1,6 @@
-sqlite3 mydb.sqlite
-
+#!/bin/sh
+mkdir sqlite
+sqlite3 sqlite/mydb.sqlitie <<EOF
 CREATE TABLE bike_sales(id INTEGER PRIMARY KEY, category TEXT, cal_date DATE, sales INTEGER);
 INSERT INTO bike_sales(category, cal_date, sales) VALUES('Mountain', '2024-06-30', 29);
 INSERT INTO bike_sales(category, cal_date, sales) VALUES('Road', '2024-06-30', 56);
@@ -79,3 +80,5 @@ INSERT INTO bike_sales(category, cal_date, sales) VALUES('Hybrid', '2024-12-15',
 INSERT INTO bike_sales(category, cal_date, sales) VALUES('Mountain', '2024-12-22', 16);
 INSERT INTO bike_sales(category, cal_date, sales) VALUES('Road', '2024-12-22', 46);
 INSERT INTO bike_sales(category, cal_date, sales) VALUES('Hybrid', '2024-12-22', 19);
+EOF
+

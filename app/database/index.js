@@ -7,6 +7,7 @@ const bigquery = require('./bigquery');
 const snowflake = require('./snowflake');
 const postgres = require('./postgres');
 const sqlserver = require('./sqlserver');
+const sqlite = require('./sqlite');
 const logger = require('../utils/logger');
 
 /**
@@ -45,6 +46,9 @@ async function executeQuery(systemConfig, query) {
         break;
       case 'sqlserver':
         result = await sqlserver.querySqlServer(systemConfig, query);
+        break;
+      case 'sqlite':
+        result = await sqlite.querySqlServer(systemConfig, query);
         break;
       default:
         throw new Error(`Unsupported system type: ${systemConfig.SystemType}`);

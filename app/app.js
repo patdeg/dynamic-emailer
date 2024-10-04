@@ -81,8 +81,13 @@ async function processEmail(emailFolderPath) {
         const chartFileName = `chart_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.png`;
         const chartFilePath = path.join('/tmp', chartFileName);
 
-	console.log("Vega data:");
-	console.table(result);
+        if (!result || !result.rows) {
+          logger.error('Query result for chart is missing rows.');
+          continue;
+        }
+
+        logger.info('Vega data:');
+        logger.info(result.rows); // Logs data before chart generation
 
         await generateChart(vegaSpec, result, chartFilePath);
 
@@ -101,18 +106,25 @@ async function processEmail(emailFolderPath) {
       now: new Date().toLocaleString(),
     });
 
-    const attachments = charts.map(chart => ({
-      filename: chart.cid,
-      path: chart.path,
-      cid: chart.cid,
-    }));
+    const attachments = charts.map(chart => {
+      if (Array.isArray(chart.path)) {
+        logger.error(`Chart path is an array: ${JSON.stringify(chart.path)}`);
+        chart.path = chart.path[0]; // Handle arrays by selecting the first item
+      }
+      return {
+        filename: chart.cid,
+        path: chart.path,
+        cid: chart.cid,
+      };
+    });
 
     await sendEmail(toEmails, name, compiledTemplate, attachments);
     charts.forEach(chart => fs.unlink(chart.path, err => { if (err) logger.warn(`Failed to delete chart: ${chart.path}`); }));
 
     logger.info(`=== Completed processing email at: ${emailFolderPath} ===\n`);
   } catch (err) {
-    logger.error(`Error processing email at "${emailFolderPath}":`, err);
+    logger.error(`Error processing email at "${emailFolderPath}": ${err.message}`);
+    logger.error(`Stack trace: ${err.stack}`);
     process.exit(1);
   }
 }

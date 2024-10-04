@@ -18,15 +18,17 @@
 
   <!-- Chart Configurations -->
   <chart>
-    <title>Outliers Over Time</title>
-    <queryfile>queries/timeseries_data.sql</queryfile>
-    <vegafile>timeseries_vega_config.json</vegafile>
-  </chart>
-  <chart>
-    <title>Category Distribution</title>
-    <queryfile>queries/category_chart_data.sql</queryfile>
-    <vegafile>category_vega_config.json</vegafile>
-  </chart>
+  <title>Bike Rides Over Time</title>
+  <queryfile>queries/timeseries_data.sql</queryfile>
+  <vegafile>timeseries_vega_config.json</vegafile>
+  <cid>time_series_chart</cid>
+</chart>
+<chart>
+  <title>Distribution of Bike Types</title>
+  <queryfile>queries/category_chart_data.sql</queryfile>
+  <vegafile>category_vega_config.json</vegafile>
+  <cid>bike_type_chart</cid>
+</chart>
 
   <format>html</format>
   <importance>High</importance>

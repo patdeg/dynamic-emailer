@@ -12,7 +12,7 @@ test:
 # Show code of all files in the project
 showcode:
 	@{ \
-		for f in `git ls-files | grep -v test` ; do \
+		for f in `git ls-files | grep -v test | grep -v package` ; do \
 			echo "// $$f"; \
 			cat "$$f"; \
 			echo; \

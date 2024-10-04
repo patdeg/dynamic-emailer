@@ -13,7 +13,15 @@ const logger = require('./utils/logger');
  * @returns {Array} - The data prepared for Vega-Lite specification.
  */
 function prepareVegaData(result) {
-  return result.rows.map(row => {
+
+  if (!result.rows || !result.fields) {
+    logger.error('Result is missing rows or fields.');
+    return [];
+  }
+	logger.info(`Preparing Vega data. Rows: ${result.rows.length}, Fields: ${result.fields.length}`);
+
+
+	return result.rows.map(row => {
     const processedRow = {};
 
     result.fields.forEach(field => {

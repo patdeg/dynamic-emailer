@@ -1,30 +1,30 @@
 
-# Emailer.js
+# Dynamic-Emailer
 
 ## Overview
 
-**Emailer.js** is a Node.js application for creating and sending customized, data-driven emails. The emails are generated based on configuration files and allow integration with various databases and visual charts using Vega-Lite.
+**Dynamic-Emailer** is a Node.js application for creating and sending customized, data-driven emails. The emails are generated based on configuration files and allow integration with various databases and visual charts using Vega-Lite.
 
 ## Features
 
 - **Dynamic Email Generation:** Generates customized emails with dynamic content, including data tables and embedded charts.
-- **Database Integration:** Supports BigQuery, Snowflake, PostgreSQL, and SQL Server.
+- **Database Integration:** Supports BigQuery, Snowflake, PostgreSQL, SQL Server, MySQL, and SQLite.
 - **Security:** Handles encryption for sensitive credentials and environment variables.
 - **Charting:** Uses Vega-Lite for creating charts embedded within emails.
 - **Logging:** Implements comprehensive logging using Winston.
 
 ## Prerequisites
 
-- **Node.js** (v14 or later)
-- **npm** (v6 or later)
-  
+- **Node.js** (v16 or later)
+- **npm** (v7 or later)
+
 ## Installation
 
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/emailer.js.git
-   cd emailer.js
+   git clone https://github.com/patdeg/dynamic-emailer.git
+   cd dynamic-emailers
    ```
 
 2. **Install Dependencies:**
@@ -38,10 +38,10 @@
    Create a `.env` file in the root directory with the following variables:
 
    ```bash
-   EMAILER_CONFIG=/path/to/.emailer_credentials
+   EMAILER_CONFIG=./.emailer_credentials
    ENCRYPTION_KEY=your_encryption_key
 
-   # SMTP configuration (using Gmail as an example)
+   # SMTP configuration
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
    SMTP_USER=your_email@gmail.com
@@ -61,11 +61,26 @@
        "System": "BigQuery",
        "SystemType": "bigquery",
        "ProjectId": "your_project_id",
-       "KeyFile": "path/to/keyfile.json"
+       "KeyFile": "path/to/keyfile.json",
        "Email": "emailer@your_project_id.iam.gserviceaccount.com"
+     },
+     {
+       "System": "MySQL",
+       "SystemType": "mysql",
+       "Host": "localhost",
+       "Port": 3306,
+       "Username": "your_username",
+       "Password": "encrypted_password"
+     },
+     {
+       "System": "SQLite",
+       "SystemType": "sqlite",
+       "Path": "emails/sqlite/mydb.sqlite"
      }
    ]
    ```
+
+   **Note:** Use the `encrypt_password.js` utility to encrypt database passwords.
 
 ## Usage
 
@@ -84,23 +99,25 @@ node app/app.js emails/email1
 ## Project Structure
 
 ```
-emailer.js/
+dynamic-emailer/
 ├── .gitignore
 ├── Makefile
 ├── README.md
 ├── LICENSE
 ├── .env
-├── .email_credentials
+├── .emailer_credentials
 ├── keys/
-│   ├── demeter-harvest-key.json
+│   └── your-key.json
 ├── app/
 │   ├── chart.js
 │   ├── config.js
 │   ├── database/
 │   │   ├── bigquery.js
 │   │   ├── index.js
+│   │   ├── mysql.js
 │   │   ├── postgres.js
 │   │   ├── snowflake.js
+│   │   ├── sqlite.js
 │   │   └── sqlserver.js
 │   ├── email.js
 │   ├── encrypt.js
@@ -108,22 +125,23 @@ emailer.js/
 │   └── utils/
 │       └── logger.js
 ├── emails/
-│   └── email1/
-│       ├── body.html
-│       ├── header.html
-│       ├── footer.html
-│       ├── param.xml
-│       ├── template.html
-│       ├── queries/
-│       │   └── sample_query.sql
-│       └── vega_config.json
+│   ├── email1/
+│   │   ├── body.html
+│   │   ├── header.html
+│   │   ├── footer.html
+│   │   ├── param.xml
+│   │   ├── template.html
+│   │   ├── queries/
+│   │   │   └── sample_query.sql
+│   │   └── vega_config.json
+│   └── create_sqlite.sh
 ├── package.json
 └── package-lock.json
 ```
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
 

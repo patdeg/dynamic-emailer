@@ -1,5 +1,5 @@
 {
-  "name": "emailer-js",
+  "name": "dynamic-emailer",
   "version": "1.0.0",
   "description": "A Node.js application for creating and sending customized, data-driven emails.",
   "main": "app/app.js",

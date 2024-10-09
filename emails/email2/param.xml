@@ -4,7 +4,6 @@
   <name>EnderForce Daily Report</name>
   <to>
 	  <email>pdeglon@gmail.com</email>
-	  <email>victor.deglon@gmail.com</email>
   </to>
   <defaultsystem>MySQL3</defaultsystem>
   <preview>This is your daily email report - PROTOTYPE</preview>

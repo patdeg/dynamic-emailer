@@ -93,3 +93,76 @@ async function querySnowflake(systemConfig, queryText) {
 module.exports = { querySnowflake };
 
 
+/***
+
+const snowflake = require('snowflake-sdk');
+const fs = require('fs');
+const path = require('path');
+
+async function querySnowflake() {
+
+    const privateKeyPath = path.resolve(__dirname, 'snowflake_account.p8');
+
+    const connection = snowflake.createConnection({
+        account: 'account_name',
+        username: 'user_name',
+        authenticator: "SNOWFLAKE_JWT",
+        privateKeyPath: privateKeyPath,
+        warehouse: 'WAREHOUSE_NAME',
+        database: 'DATABASE_NAME',
+        schema: 'REFINED',
+        logLevel: 'trace' // Enable detailed logging
+    });
+
+  try {
+    // Create a connection object with your Snowflake credentials
+    console.log('Private key path: ', privateKeyPath);    
+    // Connect to Snowflake
+    await new Promise((resolve, reject) => {
+      connection.connect((err, conn) => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log('Successfully connected to Snowflake.');
+          resolve(conn);
+        }
+      });
+    });
+
+    // Execute a simple query
+    const result = await new Promise((resolve, reject) => {
+      connection.execute({
+        sqlText: 'SELECT CURRENT_TIMESTAMP',
+        complete: (err, stmt, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows);
+          }
+        }
+      });
+    });
+
+    console.log('Query result:', result);
+
+  } catch (error) {
+    console.error('Snowflake query error:', error);
+  } finally {
+    // Close the connection
+    await new Promise((resolve, reject) => {
+      connection.destroy((err, conn) => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log('Snowflake connection closed.');
+          resolve(conn);
+        }
+      });
+    });
+  }
+}
+
+// Execute the query
+querySnowflake();
+
+***/
